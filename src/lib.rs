@@ -1,6 +1,3 @@
-pub extern crate glium;
-pub extern crate imgui;
-
 use glium::backend::{Context, Facade};
 use glium::index::{self, PrimitiveType};
 use glium::program::ProgramChooserCreationError;
@@ -18,7 +15,6 @@ use std::borrow::Cow;
 use std::error::Error;
 use std::fmt;
 use std::rc::Rc;
-use std::usize;
 
 #[derive(Clone, Debug)]
 pub enum RendererError {
