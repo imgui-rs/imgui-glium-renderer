@@ -3,15 +3,16 @@ use std::num::NonZeroU32;
 use glium::Surface;
 use glutin::{
     config::ConfigTemplateBuilder,
-    context::{ContextAttributesBuilder, NotCurrentGlContext},
-    display::{GetGlDisplay, GlDisplay},
+    context::ContextAttributesBuilder,
+    display::GetGlDisplay,
+    prelude::*,
     surface::{SurfaceAttributesBuilder, WindowSurface},
 };
-use imgui_winit_support::winit::{dpi::LogicalSize, event_loop::EventLoop, window::WindowBuilder};
-use raw_window_handle::HasRawWindowHandle;
+use imgui_winit_support::winit::{dpi::LogicalSize, event_loop::EventLoop};
+use raw_window_handle::HasWindowHandle;
 use winit::{
     event::{Event, WindowEvent},
-    window::Window,
+    window::{Window, WindowAttributes},
 };
 
 const TITLE: &str = "Hello, imgui-rs!";
@@ -31,6 +32,7 @@ fn main() {
     let mut last_frame = std::time::Instant::now();
 
     // Standard winit event loop
+    #[allow(deprecated)]
     event_loop
         .run(move |event, window_target| match event {
             Event::NewEvents(_) => {
@@ -91,19 +93,20 @@ fn main() {
 fn create_window() -> (EventLoop<()>, Window, glium::Display<WindowSurface>) {
     let event_loop = EventLoop::new().expect("Failed to create EventLoop");
 
-    let window_builder = WindowBuilder::new()
+    let window_attributes = WindowAttributes::default()
         .with_title(TITLE)
         .with_inner_size(LogicalSize::new(1024, 768));
 
     let (window, cfg) = glutin_winit::DisplayBuilder::new()
-        .with_window_builder(Some(window_builder))
+        .with_window_attributes(Some(window_attributes.clone()))
         .build(&event_loop, ConfigTemplateBuilder::new(), |mut configs| {
             configs.next().unwrap()
         })
         .expect("Failed to create OpenGL window");
     let window = window.unwrap();
 
-    let context_attribs = ContextAttributesBuilder::new().build(Some(window.raw_window_handle()));
+    let context_attribs =
+        ContextAttributesBuilder::new().build(Some(window.window_handle().unwrap().as_raw()));
     let context = unsafe {
         cfg.display()
             .create_context(&cfg, &context_attribs)
@@ -111,7 +114,7 @@ fn create_window() -> (EventLoop<()>, Window, glium::Display<WindowSurface>) {
     };
 
     let surface_attribs = SurfaceAttributesBuilder::<WindowSurface>::new().build(
-        window.raw_window_handle(),
+        window.window_handle().unwrap().as_raw(),
         NonZeroU32::new(1024).unwrap(),
         NonZeroU32::new(768).unwrap(),
     );
@@ -135,7 +138,7 @@ fn imgui_init(window: &Window) -> (imgui_winit_support::WinitPlatform, imgui::Co
     let mut imgui_context = imgui::Context::create();
     imgui_context.set_ini_filename(None);
 
-    let mut winit_platform = imgui_winit_support::WinitPlatform::init(&mut imgui_context);
+    let mut winit_platform = imgui_winit_support::WinitPlatform::new(&mut imgui_context);
 
     let dpi_mode = imgui_winit_support::HiDpiMode::Default;
 
