@@ -25,7 +25,7 @@ fn main() {
     let (mut winit_platform, mut imgui_context) = imgui_init(&window);
 
     // Create renderer from this crate
-    let mut renderer = imgui_glium_renderer::Renderer::init(&mut imgui_context, &display)
+    let mut renderer = imgui_glium_renderer::Renderer::new(&mut imgui_context, &display)
         .expect("Failed to initialize renderer");
 
     // Timer for FPS calculation

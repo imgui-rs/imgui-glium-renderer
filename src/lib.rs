@@ -137,10 +137,8 @@ impl glium::vertex::Vertex for GliumDrawVert {
 }
 
 impl Renderer {
-    pub fn init<F: Facade>(
-        ctx: &mut imgui::Context,
-        facade: &F,
-    ) -> Result<Renderer, RendererError> {
+    /// Creates a new [`Renderer`].
+    pub fn new<F: Facade>(ctx: &mut imgui::Context, facade: &F) -> Result<Renderer, RendererError> {
         let program = compile_default_program(facade)?;
         let font_texture = upload_font_texture(ctx.fonts(), facade.get_context())?;
         ctx.set_renderer_name(Some(format!(
@@ -157,6 +155,16 @@ impl Renderer {
             textures: Textures::new(),
         })
     }
+
+    /// Creates a new [`Renderer`]
+    #[deprecated(since = "0.13.0", note = "use `new` instead")]
+    pub fn init<F: Facade>(
+        ctx: &mut imgui::Context,
+        facade: &F,
+    ) -> Result<Renderer, RendererError> {
+        Self::new(ctx, facade)
+    }
+
     pub fn reload_font_texture(&mut self, ctx: &mut imgui::Context) -> Result<(), RendererError> {
         self.font_texture = upload_font_texture(ctx.fonts(), &self.ctx)?;
         Ok(())
